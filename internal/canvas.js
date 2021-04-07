@@ -27,6 +27,13 @@ const createResizer = memoize(({ dimensions, trackMouse }) => {
   };
 });
 
+export const write = (ctx, text, { x, y, alpha, font, style }) => {
+  ctx.globalAlpha = alpha ?? 1;
+  ctx.font = font ?? '24px Arial';
+  ctx.fillStyle = style ?? 'black';
+  ctx.fillText(text, x ?? 0, y ?? 0);
+};
+
 export const init = ({ element, dimensions, trackMouse }) => {
   const ctx = globals.set("ruckus.canvas.ctx", getContext(element));
   const resize = createResizer({ dimensions, trackMouse });
