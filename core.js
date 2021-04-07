@@ -30,7 +30,7 @@ const render = () => {
 
   timings.accumulator += timings.delta;
 
-  while (metrics.timings.accumulator >= metrics.timings.ms) {
+  while (timings.accumulator >= timings.ms) {
     for (const callback of ruckus.callbacks.update) {
       callback(timings.delta);
     }
