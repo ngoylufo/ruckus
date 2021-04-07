@@ -1,4 +1,4 @@
-import { init } from "./internal/canvas.js";
+import { init, clear, fill } from "./internal/canvas.js";
 import * as globals from "./internal/globals.js";
 
 const ruckus = globals.set("ruckus", {
@@ -36,6 +36,9 @@ const render = () => {
     }
     timings.accumulator -= timings.delta;
   }
+
+  ruckus.canvas.clear && clear(ruckus.canvas.ctx);
+  ruckus.canvas.fill && fill(ruckus.canvas.ctx, ruckus.canvas.fill);
 
   for (const callback of ruckus.callbacks.render) {
     callback(ruckus.canvas.ctx);

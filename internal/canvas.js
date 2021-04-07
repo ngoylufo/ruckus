@@ -34,6 +34,15 @@ export const write = (ctx, text, { x, y, alpha, font, style }) => {
   ctx.fillText(text, x ?? 0, y ?? 0);
 };
 
+export const fill = (ctx, style) => {
+  ctx.fillStyle = style ?? "#041B41";
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+};
+
+export const clear = (ctx) => {
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+};
+
 export const init = ({ element, dimensions, trackMouse }) => {
   const ctx = globals.set("ruckus.canvas.ctx", getContext(element));
   const resize = createResizer({ dimensions, trackMouse });
