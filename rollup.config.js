@@ -9,12 +9,21 @@ const resolve = (...paths) => path.resolve(__dirname, ...paths);
 
 export default {
 	input: "src/main.js",
-	output: {
-		format: "es",
-		name: "ruckus",
-		sourcemap: true,
-		file: resolve("dist", "ruckus.js")
-	},
+	output: [
+		{
+			format: "es",
+			name: "ruckus",
+			sourcemap: true,
+			file: resolve("dist", "ruckus.js"),
+		},
+		{
+			format: "umd",
+			name: "ruckus",
+			sourcemap: true,
+			file: resolve("dist", "ruckus.min.js"),
+			plugins: [production && terser()]
+		}
+	],
 	plugins: [
 		alias({
 			entries: {
@@ -23,7 +32,6 @@ export default {
 			}
 		}),
 		commonjs(),
-		production && terser(),
 		analyze({ summaryOnly: true })
 	],
 	watch: {
