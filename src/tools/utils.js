@@ -11,7 +11,7 @@ export const memoize = (callback, serializer = JSON.stringify) => {
 	};
 };
 
-// export const memoizeAsync = (asyncCallback, serializer = JSON.stringify) => {
-// 	const memo = memoize(asyncCallback, serializer);
-// 	return async (...args) => await memo(...args);
-// };
+export const memoizeAsync = (asyncCallback, serializer = JSON.stringify) => {
+	const memo = memoize(asyncCallback, serializer);
+	return async (...args) => await memo(...args);
+};
