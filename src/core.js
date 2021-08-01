@@ -1,5 +1,5 @@
 import globals from "$tools/globals";
-import * as events from "$modules/events";
+import events from "$modules/events";
 import * as canvas from "$modules/canvas";
 import { noop, error } from "$tools/utils";
 
@@ -15,14 +15,14 @@ const loop = () => {
 	metrics.timings.acc += metrics.timings.delta;
 	metrics.timings.last = metrics.timings.now;
 
-	events.trigger("tick");
+	events.emit("ruckus:tick");
 
 	while (metrics.timings.acc >= metrics.timings.ms) {
-		events.trigger("ruckus:update", metrics);
+		events.emit("ruckus:update", metrics);
 		metrics.timings.acc -= metrics.timings.delta;
 	}
 
-	events.trigger("ruckus:render", globals.context);
+	events.emit("ruckus:render", globals.context);
 };
 
 export const init = (reference, configurations = {}) => {
@@ -34,14 +34,11 @@ export const init = (reference, configurations = {}) => {
 		return noop;
 	})();
 
-	events.register("tick");
-	events.register("ruckus:render");
-	events.register("ruckus:update");
 	canvas.initialize(reference, globals.options);
 };
 
 export const on = (action, callback) => {
-	if (!["update", "render"].includes(action)) {
+	if (!["tick", "update", "render"].includes(action)) {
 		return error(`No action named ${action}!`);
 	}
 
@@ -54,11 +51,11 @@ export const start = () => {
 	if (!globals.context) {
 		return error("Canvas was not yet initialized!");
 	}
-	events.trigger("start");
+	events.emit("ruckus:start");
 	loop();
 };
 
 export const stop = () => {
 	cancelAnimationFrame(metrics.frames.rid);
-	events.trigger("stop", metrics);
+	events.emit("ruckus:stop", metrics);
 };

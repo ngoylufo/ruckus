@@ -1,8 +1,8 @@
 import globals from "$tools/globals";
 import { error } from "$tools/utils";
 import * as canvas from "$modules/canvas";
+export { default as events } from "$modules/events";
 
-export * as events from "$modules/events";
 export { init, on, start, stop } from "./core";
 
 export const addEventListener = (type, callback) => {
