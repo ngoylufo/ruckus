@@ -1,16 +1,17 @@
-import globals from "$tools/globals";
-import { error } from "$tools/utils";
-import * as canvas from "$modules/canvas";
-export { default as events } from "$modules/events";
+import events from "$modules/events";
+import canvas, { puts, cursor } from "$modules/canvas";
+import { init, renderWith, updateWith, start, stop } from "./core";
 
-export { init, on, start, stop } from "./core";
-
-export const addEventListener = (type, callback) => {
-	if (!globals.context) return error("Canvas was not yet initialized!");
-	canvas.addEventListener(type, callback);
-};
-
-export const puts = (text, position, putsOptions = {}) => {
-	if (!globals.context) return error("Canvas was not yet initialized!");
-	canvas.puts(globals.context, text, position, putsOptions);
+export default {
+	init,
+	events,
+	start,
+	stop,
+	renderWith,
+	updateWith,
+	canvas: {
+		puts,
+		cursor,
+		addEventListener: canvas.addEventListener
+	}
 };

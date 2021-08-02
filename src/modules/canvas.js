@@ -1,34 +1,92 @@
-import globals from "$tools/globals";
+import { memoize } from "$tools/utils";
 
-const defaultOptions = {
-	dimensions: null,
-	text: {
-		color: "#666",
-		align: "start",
-		font: "20px serif",
-		baseline: "alphabetical"
+const state = { rect: null, cursor: { x: 0, y: 0 } };
+
+const get_context = memoize(
+	(canvas) => {
+		if (typeof canvas === "string") {
+			return document.querySelector(canvas).getContext("2d");
+		}
+		return canvas.getContext("2d");
+	},
+	() => {}
+);
+
+const get_dimensions = (canvas, dimensions) => {
+	if (dimensions === "viewport") {
+		return { width: innerWidth, height: innerHeight };
 	}
-};
-
-const getContext = (canvas) => {
-	if (typeof canvas === "string") {
-		return document.querySelector(canvas).getContext("2d");
+	if (dimensions?.width && dimensions?.height) {
+		return dimensions;
 	}
-	return canvas.getContext("2d");
+	return canvas.parentElement.getBoundingClientRect();
 };
 
-export const clear = (ctx) => {
-	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+const add_resize_listener = (context, dimensions) => {
+	const devicePixelRatio = window.devicePixelRatio ?? 1;
+
+	window.addEventListener("resize", () => {
+		const { width, height } = get_dimensions(context.canvas, dimensions);
+
+		context.canvas.style.width = `${width}px`;
+		context.canvas.style.height = `${height}px`;
+		context.canvas.width = Math.floor(width * devicePixelRatio);
+		context.canvas.height = Math.floor(height * devicePixelRatio);
+
+		state.rect = context.canvas.getBoundingClientRect();
+		context.scale(devicePixelRatio, devicePixelRatio);
+	});
+
+	setTimeout(() => {
+		window.dispatchEvent(new Event("resize"));
+	}, 50);
 };
 
-export const fill = (ctx, style) => {
-	ctx.fillStyle = style;
-	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+const add_mouse_listener = (context) => {
+	state.rect = context.canvas.getBoundingClientRect();
+
+	context.canvas.addEventListener("mouseleave", () => {
+		state.cursor.x = state.cursor.y = undefined;
+	});
+
+	context.canvas.addEventListener("mousemove", (event) => {
+		state.cursor.x = event.x - state.rect.left;
+		state.cursor.y = event.y - state.rect.top;
+	});
+};
+
+const addEventListener = (type, callback) => {
+	const { canvas } = get_context();
+	canvas.addEventListener(type, function (event) {
+		callback(event, canvas);
+	});
+};
+
+const initialize = (element, options = {}) => {
+	const context = get_context(element);
+	options.fill && (state.fillStyle = options.fill);
+
+	if (options.cursor) {
+		add_mouse_listener(context);
+	}
+
+	add_resize_listener(context, options.dimensions);
+
+	return (state.context = context);
+};
+
+export const cursor = memoize(() => state.cursor);
+
+export const clear = (context) => {
+	context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+};
+
+export const fill = (context) => {
+	context.fillStyle = state.fillStyle;
+	context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 };
 
 export const puts = (ctx, text, position, putsOptions = {}) => {
-	putsOptions = Object.assign({}, defaultOptions.text, putsOptions);
-
 	ctx.save();
 	ctx.font = putsOptions.font;
 	ctx.fillStyle = putsOptions.color;
@@ -46,34 +104,4 @@ export const puts = (ctx, text, position, putsOptions = {}) => {
 	ctx.restore();
 };
 
-export const addEventListener = (type, callback) => {
-	globals.context.canvas.addEventListener(type, function (event) {
-		callback(event, globals.context.canvas);
-	});
-};
-
-export const initialize = (canvas, options = {}) => {
-	const devicePixelRatio = window.devicePixelRatio ?? 1;
-	options = Object.assign({}, defaultOptions, options);
-	globals.context = getContext(canvas);
-
-	const get_dimensions = (() => {
-		if (options.dimensions) return () => options.dimensions;
-		return () => globals.context.canvas.getBoundingClientRect();
-	})();
-
-	globals.canvasOptions = window.addEventListener("resize", function () {
-		const dimensions = get_dimensions();
-		globals.context.canvas.width = devicePixelRatio * dimensions.width;
-		globals.context.canvas.height = devicePixelRatio * dimensions.height;
-
-		if (options.dimensions) {
-			globals.context.canvas.style.width = `${dimensions.width}px`;
-			globals.context.canvas.style.height = `${dimensions.height}px`;
-		}
-
-		globals.context.scale(devicePixelRatio, devicePixelRatio);
-	});
-
-	window.dispatchEvent(new Event("resize"));
-};
+export default { initialize, addEventListener };

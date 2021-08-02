@@ -1,61 +1,67 @@
-import globals from "$tools/globals";
+import { noop } from "$tools/utils";
 import events from "$modules/events";
-import * as canvas from "$modules/canvas";
-import { noop, error } from "$tools/utils";
+import canvas, { clear, fill } from "$modules/canvas";
 
-const defaultOptions = {};
-const metrics = { frames: { rid: 0 }, timings: { acc: 0, delta: 0, last: 0 } };
+const globals = { context: null };
+const metrics = { frames: {}, timings: {} };
+const actions = { clear: noop, render: noop, update: noop };
 
-const loop = () => {
-	metrics.frames.rid = requestAnimationFrame(loop);
-	globals.clear(globals.context, globals.options.fill);
+const looper = (timestamp) => {
+	const { frames, timings } = metrics;
 
-	metrics.timings.now = performance.now();
-	metrics.timings.delta = metrics.timings.now - metrics.timings.last;
-	metrics.timings.acc += metrics.timings.delta;
-	metrics.timings.last = metrics.timings.now;
+	frames.rid = requestAnimationFrame(looper);
+	timings.delta = timestamp - timings.last;
+	timings.acc += timings.delta;
 
-	events.emit("ruckus:tick");
+	if (timings.delta > timings.interval) {
+		timings.last = timestamp - (timings.delta % timings.interval);
+		events.emit("ruckus:tick", timings);
 
-	while (metrics.timings.acc >= metrics.timings.ms) {
-		events.emit("ruckus:update", metrics);
-		metrics.timings.acc -= metrics.timings.delta;
+		while (timings.acc >= timings.interval) {
+			actions.update(timings);
+			timings.acc -= timings.interval;
+		}
+
+		actions.clear(globals.context);
+		actions.render(globals.context);
 	}
-
-	events.emit("ruckus:render", globals.context);
 };
 
-export const init = (reference, configurations = {}) => {
-	globals.options = { ...defaultOptions, ...configurations };
+export const init = (element, options = {}) => {
+	metrics.frames.rid = metrics.frames.count = 0;
+	metrics.timings.fps = options?.time?.fps ?? 60;
+	metrics.timings.step = 1 / metrics.timings.fps;
+	metrics.timings.interval = 1000 / metrics.timings.fps;
 
-	globals.clear = (() => {
-		if (configurations.clear && !configurations.fill) return canvas.clear;
-		if (configurations.fill) return canvas.fill;
+	events.once("ruckus:start", function () {
+		metrics.timings.acc = 0;
+		metrics.timings.last = performance.now();
+		metrics.timings.start = metrics.timings.last;
+	});
+
+	actions.clear = (() => {
+		if (options.canvas.clear) return clear;
+		if (options.canvas.fill) return fill;
 		return noop;
 	})();
 
-	canvas.initialize(reference, globals.options);
+	globals.context = canvas.initialize(element, options.canvas);
 };
 
-export const on = (action, callback) => {
-	if (!["tick", "update", "render"].includes(action)) {
-		return error(`No action named ${action}!`);
-	}
+export const updateWith = (callback) => {
+	actions.update = callback;
+};
 
-	const name = `ruckus:${action}`;
-	events.off(name, globals[name]);
-	events.on(name, (globals[name] = callback));
+export const renderWith = (callback) => {
+	actions.render = callback;
 };
 
 export const start = () => {
-	if (!globals.context) {
-		return error("Canvas was not yet initialized!");
-	}
-	events.emit("ruckus:start");
-	loop();
+	events.emit("ruckus:start", metrics.timings);
+	requestAnimationFrame(looper);
 };
 
 export const stop = () => {
 	cancelAnimationFrame(metrics.frames.rid);
-	events.emit("ruckus:stop", metrics);
+	events.emit("ruckus:stop", metrics.timings);
 };
