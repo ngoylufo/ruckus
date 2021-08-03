@@ -15,6 +15,9 @@
  * @typedef {Map<String, Listeners>} Events
  */
 
+/** @type {Events} */
+const events = new Map();
+
 /**
  * Returns the set of all listeners for a particular event.
  * @param {Events} events The collection of all events.
