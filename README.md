@@ -20,7 +20,7 @@ ruckus.init("canvas#main", {
 });
 
 ruckus.events.once("ruckus:start", function () {
-	// cursor only available after the ruckus.init() is called.
+	// cursor only available after ruckus.init() is called.
 	cursor = ruckus.canvas.cursor();
 });
 
