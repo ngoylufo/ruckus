@@ -89,7 +89,7 @@ export const fill = (context) => {
 export const puts = (ctx, text, position, putsOptions = {}) => {
 	ctx.save();
 	ctx.font = putsOptions.font;
-	ctx.fillStyle = putsOptions.color;
+	ctx.fillStyle = putsOptions.colour;
 
 	if (position === "center") {
 		ctx.textAlign = "center";
