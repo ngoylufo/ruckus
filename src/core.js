@@ -1,6 +1,7 @@
 import { noop } from "$tools/utils";
-import events from "$modules/events";
-import { initialize, clear, fill } from "$modules/canvas";
+import { initialize, on, puts, cursor, clear, fill } from "$modules/canvas";
+
+import events from "ruckus/events";
 
 const globals = { context: null };
 const metrics = { frames: {}, timings: {} };
@@ -27,13 +28,21 @@ const looper = (timestamp) => {
 	}
 };
 
+const updateWith = (callback) => {
+	actions.update = callback;
+};
+
+const renderWith = (callback) => {
+	actions.render = callback;
+};
+
 export const init = (element, options = {}) => {
 	metrics.frames.rid = metrics.frames.count = 0;
 	metrics.timings.fps = options?.time?.fps ?? 60;
 	metrics.timings.step = 1 / metrics.timings.fps;
 	metrics.timings.interval = 1000 / metrics.timings.fps;
 
-	events.once("ruckus:start", function () {
+	events.once("ruckus:start", () => {
 		metrics.timings.acc = 0;
 		metrics.timings.last = performance.now();
 		metrics.timings.start = metrics.timings.last;
@@ -48,20 +57,13 @@ export const init = (element, options = {}) => {
 	globals.context = initialize(element, options.canvas);
 };
 
-export const updateWith = (callback) => {
-	actions.update = callback;
-};
-
-export const renderWith = (callback) => {
-	actions.render = callback;
-};
-
-export const start = () => {
+export const start = (callback) => {
+	callback && callback({ on, cursor, puts }, { renderWith, updateWith });
 	events.emit("ruckus:start", metrics.timings);
 	requestAnimationFrame(looper);
 };
 
 export const stop = () => {
-	cancelAnimationFrame(metrics.frames.rid);
 	events.emit("ruckus:stop", metrics.timings);
+	cancelAnimationFrame(metrics.frames.rid);
 };

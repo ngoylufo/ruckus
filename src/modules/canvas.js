@@ -12,14 +12,14 @@ const context = memoize(
 	() => undefined
 );
 
-const dimensions = (dimensions) => {
+const dimensions = (ctx, dimensions) => {
 	if (dimensions === "viewport") {
 		return { width: innerWidth, height: innerHeight };
 	}
 	if (dimensions?.width && dimensions?.height) {
 		return dimensions;
 	}
-	return canvas.parentElement.getBoundingClientRect();
+	return ctx.canvas.parentElement.getBoundingClientRect();
 };
 
 const add_resize_listener = (options) => {
@@ -27,7 +27,7 @@ const add_resize_listener = (options) => {
 	const devicePixelRatio = window.devicePixelRatio ?? 1;
 
 	window.addEventListener("resize", function () {
-		const { width, height } = dimensions(options.dimensions);
+		const { width, height } = dimensions(ctx, options.dimensions);
 
 		ctx.canvas.style.width = `${width}px`;
 		ctx.canvas.style.height = `${height}px`;
@@ -43,7 +43,7 @@ const add_resize_listener = (options) => {
 	}, 100);
 };
 
-const add_mouse_listeners = (ctx) => {
+const add_mouse_listeners = () => {
 	const ctx = context();
 
 	ctx.canvas.addEventListener("mouseleave", () => {
@@ -65,27 +65,6 @@ export const fill = (ctx) => {
 	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
-export const on = (event, callback) => {
-	const { canvas } = context();
-	canvas.addEventListener(event, callback);
-};
-
-export const cursor = memoize(
-	() => {
-		add_mouse_listeners();
-
-		return {
-			get x() {
-				return state.cursor.x;
-			},
-			get y() {
-				return state.cursor.y;
-			}
-		};
-	},
-	() => undefined
-);
-
 export const puts = (ctx, text, position, putsOptions = {}) => {
 	ctx.save();
 	ctx.font = putsOptions.font;
@@ -103,6 +82,27 @@ export const puts = (ctx, text, position, putsOptions = {}) => {
 	ctx.fillText(text, position[0], position[1]);
 	ctx.restore();
 };
+
+export const on = (event, callback) => {
+	const ctx = context();
+	ctx.canvas.addEventListener(event, callback);
+};
+
+export const cursor = memoize(
+	() => {
+		add_mouse_listeners();
+
+		return {
+			get x() {
+				return state.cursor.x;
+			},
+			get y() {
+				return state.cursor.y;
+			}
+		};
+	},
+	() => undefined
+);
 
 export const initialize = (element, options = {}) => {
 	const ctx = context(element);

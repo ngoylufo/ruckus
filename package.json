@@ -1,13 +1,26 @@
 {
 	"name": "ruckus",
-	"type": "module",
 	"version": "0.1.0",
 	"description": "A JavaScript game framework.",
-	"main": "src/main.js",
-	"scripts": {
-		"build": "rollup --config",
-		"dev": "rollup --config --watch"
+	"module": "main.mjs",
+	"main": "main",
+	"exports": {
+		"./package.json": "./package.json",
+		".": {
+			"import": "./main.mjs",
+			"require": "./main.js"
+		},
+		"./events": {
+			"import": "./modules/events.mjs",
+			"require": "./modules/events.js"
+		}
 	},
+	"scripts": {
+		"dev": "rollup -cw",
+		"build": "rollup -c",
+		"format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. ."
+	},
+	"author": "Ngoy Lufo",
 	"license": "MIT",
 	"devDependencies": {
 		"@rollup/plugin-alias": "^3.1.2",
