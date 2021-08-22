@@ -4,6 +4,11 @@
 	"description": "A JavaScript game framework.",
 	"module": "main.mjs",
 	"main": "main",
+	"files": [
+		"modules",
+		"main.*js",
+		"README.md"
+	],
 	"exports": {
 		"./package.json": "./package.json",
 		".": {
@@ -28,7 +33,6 @@
 		"@rollup/plugin-node-resolve": "^13.0.0",
 		"prettier": "^2.3.2",
 		"rollup": "^2.52.3",
-		"rollup-plugin-analyzer": "^4.0.0",
-		"rollup-plugin-terser": "^7.0.2"
+		"rollup-plugin-analyzer": "^4.0.0"
 	}
 }
