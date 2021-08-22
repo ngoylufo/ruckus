@@ -1,18 +1,18 @@
 import { memoize } from "$tools/utils";
 
-const state = { rect: null, cursor: { x: 0, y: 0 } };
+const state = { rect: null, cursor: {} };
 
-const get_context = memoize(
-	(canvas) => {
-		if (typeof canvas === "string") {
-			return document.querySelector(canvas).getContext("2d");
+const context = memoize(
+	(element) => {
+		if (typeof element === "string") {
+			return document.querySelector(element).getContext("2d");
 		}
-		return canvas.getContext("2d");
+		return element.getContext("2d");
 	},
-	() => {}
+	() => undefined
 );
 
-const get_dimensions = (canvas, dimensions) => {
+const dimensions = (dimensions) => {
 	if (dimensions === "viewport") {
 		return { width: innerWidth, height: innerHeight };
 	}
@@ -22,69 +22,69 @@ const get_dimensions = (canvas, dimensions) => {
 	return canvas.parentElement.getBoundingClientRect();
 };
 
-const add_resize_listener = (context, dimensions) => {
+const add_resize_listener = (options) => {
+	const ctx = context();
 	const devicePixelRatio = window.devicePixelRatio ?? 1;
 
-	window.addEventListener("resize", () => {
-		const { width, height } = get_dimensions(context.canvas, dimensions);
+	window.addEventListener("resize", function () {
+		const { width, height } = dimensions(options.dimensions);
 
-		context.canvas.style.width = `${width}px`;
-		context.canvas.style.height = `${height}px`;
-		context.canvas.width = Math.floor(width * devicePixelRatio);
-		context.canvas.height = Math.floor(height * devicePixelRatio);
+		ctx.canvas.style.width = `${width}px`;
+		ctx.canvas.style.height = `${height}px`;
+		ctx.canvas.width = Math.floor(width * devicePixelRatio);
+		ctx.canvas.height = Math.floor(height * devicePixelRatio);
 
-		state.rect = context.canvas.getBoundingClientRect();
-		context.scale(devicePixelRatio, devicePixelRatio);
+		state.rect = ctx.canvas.getBoundingClientRect();
+		ctx.scale(devicePixelRatio, devicePixelRatio);
 	});
 
 	setTimeout(() => {
 		window.dispatchEvent(new Event("resize"));
-	}, 50);
+	}, 100);
 };
 
-const add_mouse_listener = (context) => {
-	state.rect = context.canvas.getBoundingClientRect();
+const add_mouse_listeners = (ctx) => {
+	const ctx = context();
 
-	context.canvas.addEventListener("mouseleave", () => {
+	ctx.canvas.addEventListener("mouseleave", () => {
 		state.cursor.x = state.cursor.y = undefined;
 	});
 
-	context.canvas.addEventListener("mousemove", (event) => {
+	ctx.canvas.addEventListener("mousemove", (event) => {
 		state.cursor.x = event.x - state.rect.left;
 		state.cursor.y = event.y - state.rect.top;
 	});
 };
 
-const addEventListener = (type, callback) => {
-	const { canvas } = get_context();
-	canvas.addEventListener(type, function (event) {
-		callback(event, canvas);
-	});
+export const clear = (ctx) => {
+	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
-const initialize = (element, options = {}) => {
-	const context = get_context(element);
-	options.fill && (state.fillStyle = options.fill);
-
-	if (options.cursor) {
-		add_mouse_listener(context);
-	}
-
-	add_resize_listener(context, options.dimensions);
-
-	return (state.context = context);
+export const fill = (ctx) => {
+	ctx.fillStyle = state.fill;
+	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 };
 
-export const cursor = memoize(() => state.cursor);
-
-export const clear = (context) => {
-	context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+export const on = (event, callback) => {
+	const { canvas } = context();
+	canvas.addEventListener(event, callback);
 };
 
-export const fill = (context) => {
-	context.fillStyle = state.fillStyle;
-	context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-};
+export const cursor = memoize(
+	() => {
+		add_mouse_listeners();
+
+		return {
+			get x() {
+				return state.cursor.x;
+			},
+			get y() {
+				return state.cursor.y;
+			}
+		};
+	},
+	() => undefined
+);
 
 export const puts = (ctx, text, position, putsOptions = {}) => {
 	ctx.save();
@@ -104,4 +104,9 @@ export const puts = (ctx, text, position, putsOptions = {}) => {
 	ctx.restore();
 };
 
-export default { initialize, addEventListener };
+export const initialize = (element, options = {}) => {
+	const ctx = context(element);
+	options.fill && (state.fill = options.fill);
+	add_resize_listener(ctx, options.dimensions);
+	return ctx;
+};

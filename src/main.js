@@ -1,5 +1,5 @@
 import events from "$modules/events";
-import canvas, { puts, cursor } from "$modules/canvas";
+import { on, puts, cursor } from "$modules/canvas";
 import { init, renderWith, updateWith, start, stop } from "./core";
 
 export default {
@@ -10,8 +10,8 @@ export default {
 	renderWith,
 	updateWith,
 	canvas: {
+		on,
 		puts,
-		cursor,
-		addEventListener: canvas.addEventListener
+		cursor
 	}
 };

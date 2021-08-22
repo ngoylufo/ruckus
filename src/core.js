@@ -1,6 +1,6 @@
 import { noop } from "$tools/utils";
 import events from "$modules/events";
-import canvas, { clear, fill } from "$modules/canvas";
+import { initialize, clear, fill } from "$modules/canvas";
 
 const globals = { context: null };
 const metrics = { frames: {}, timings: {} };
@@ -45,7 +45,7 @@ export const init = (element, options = {}) => {
 		return noop;
 	})();
 
-	globals.context = canvas.initialize(element, options.canvas);
+	globals.context = initialize(element, options.canvas);
 };
 
 export const updateWith = (callback) => {
