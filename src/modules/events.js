@@ -75,4 +75,15 @@ const emit = async (event, data) => {
 	listeners.forEach((listener) => listener(data));
 };
 
-export default { on, off, once, emit };
+/**
+ * Returns an array of all registered events and their respective listeners.
+ * @param {string} [event] - The name of the event to get listeners for.
+ */
+const listeners = (event) => {
+	if (event) {
+		return [...getEventListeners(events, event)];
+	}
+	return [...events].map(([n, ls]) => [n, [...ls]]);
+};
+
+export default { on, off, once, emit, listeners };
