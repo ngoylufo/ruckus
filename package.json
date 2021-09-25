@@ -7,7 +7,8 @@
 	"types": "./types/main.d.ts",
 	"files": [
 		"modules",
-		"main.*js",
+		"types",
+		"main.*",
 		"README.md"
 	],
 	"exports": {
