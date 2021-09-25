@@ -3,8 +3,8 @@
 	"compilerOptions": {
 		"lib": ["es2020", "DOM"],
 		"target": "es2020",
-
 		"baseUrl": ".",
+		"rootDir": "src",
 		"paths": {
 			"$tools/*": ["./src/tools/*"],
 			"ruckus/*": ["./src/modules/*"],
@@ -12,24 +12,17 @@
 			"$utils/*": ["./src/utils/*"]
 		},
 		"typeRoots": ["./node_modules/@types"],
-
 		"declaration": true,
-		"declarationDir": "./types",
-
-		"sourceMap": true,
+		"declarationDir": "types",
 		"esModuleInterop": true,
 		"skipLibCheck": true,
-
 		"noEmitOnError": true,
 		"noErrorTruncation": true,
-
 		"module": "esnext",
 		"moduleResolution": "node",
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true,
-
 		"stripInternal": true,
-
 		"strict": true,
 		"noUnusedLocals": true,
 		"noImplicitReturns": true,

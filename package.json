@@ -4,6 +4,7 @@
 	"description": "A JavaScript game framework.",
 	"module": "main.mjs",
 	"main": "main",
+	"types": "./types/main.d.ts",
 	"files": [
 		"modules",
 		"main.*js",

@@ -10,7 +10,7 @@ const ext = (extname) => (name) => name.replace(/\.(j|t)s$/, extname);
 
 const plugins = [
 	commonjs(),
-	typescript({ include: "src/**", typescript: require("typescript") }),
+	typescript({ tsconfig: "./tsconfig.json" }),
 	alias({
 		entries: { $utils: resolve("src/utils"), $modules: resolve("src/modules") }
 	})
