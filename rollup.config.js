@@ -1,37 +1,36 @@
 import fs from "fs";
 import path from "path";
 import alias from "@rollup/plugin-alias";
-import analyze from "rollup-plugin-analyzer";
 import commonjs from "@rollup/plugin-commonjs";
+import typescript from "@rollup/plugin-typescript";
 
 const external = (id) => id.startsWith("ruckus/");
 const resolve = (...paths) => path.resolve(__dirname, ...paths);
-const ext = (extname) => (name) => name.replace(/\.js$/, extname);
+const ext = (extname) => (name) => name.replace(/\.(j|t)s$/, extname);
 
 const plugins = [
-	alias({
-		entries: {
-			$tools: resolve("src/tools"),
-			$modules: resolve("src/modules")
-		}
-	}),
 	commonjs(),
-	analyze({ summaryOnly: true })
+	typescript({ include: "src/**", typescript: require("typescript") }),
+	alias({
+		entries: { $utils: resolve("src/utils"), $modules: resolve("src/modules") }
+	})
 ];
 
 export default [
 	{
-		input: "src/main.js",
+		input: "src/main.ts",
 		output: [
 			{
 				format: "esm",
 				file: "main.mjs",
-				exports: "default"
+				exports: "default",
+				sourcemap: true
 			},
 			{
 				format: "cjs",
 				file: "main.js",
-				exports: "default"
+				exports: "default",
+				sourcemap: true
 			}
 		],
 		plugins,
@@ -39,19 +38,21 @@ export default [
 	},
 	...fs
 		.readdirSync("src/modules")
-		.filter((file) => !file.includes("canvas.js"))
+		.filter((file) => !file.includes("canvas.ts"))
 		.map((file) => ({
 			input: `src/modules/${file}`,
 			output: [
 				{
 					format: "esm",
 					exports: "auto",
-					file: resolve("modules", ext(".mjs")(file))
+					file: resolve("modules", ext(".mjs")(file)),
+					sourcemap: true
 				},
 				{
 					format: "cjs",
 					exports: "auto",
-					file: resolve("modules", ext(".js")(file))
+					file: resolve("modules", ext(".js")(file)),
+					sourcemap: true
 				}
 			],
 			plugins,

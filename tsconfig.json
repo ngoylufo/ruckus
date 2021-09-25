@@ -1,0 +1,40 @@
+{
+	"include": ["src/**/*.d.ts", "src/**/*.js", "src/**/*.ts"],
+	"compilerOptions": {
+		"lib": ["es2020", "DOM"],
+		"target": "es2020",
+
+		"baseUrl": ".",
+		"paths": {
+			"$tools/*": ["./src/tools/*"],
+			"ruckus/*": ["./src/modules/*"],
+			"$modules/*": ["./src/modules/*"],
+			"$utils/*": ["./src/utils/*"]
+		},
+		"typeRoots": ["./node_modules/@types"],
+
+		"declaration": true,
+		"declarationDir": "./types",
+
+		"sourceMap": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+
+		"noEmitOnError": true,
+		"noErrorTruncation": true,
+
+		"module": "esnext",
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"allowSyntheticDefaultImports": true,
+
+		"stripInternal": true,
+
+		"strict": true,
+		"noUnusedLocals": true,
+		"noImplicitReturns": true,
+		"noUnusedParameters": true,
+		"downlevelIteration": true,
+		"noFallthroughCasesInSwitch": true
+	}
+}
