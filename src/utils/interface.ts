@@ -8,7 +8,7 @@ export interface FixedDimensions {
 export type Dimensions = "viewport" | "container" | FixedDimensions;
 
 export interface Noop {
-	(): void;
+	(...args: never[]): void;
 }
 
 export interface ClearCallback extends Noop {
@@ -20,7 +20,7 @@ export interface UpdateCallback extends Noop {
 }
 
 export interface RenderCallback extends Noop {
-	(ctx: Context): void;
+	(ctx: Readonly<Context>): void;
 }
 
 export interface CanvasOptions {
