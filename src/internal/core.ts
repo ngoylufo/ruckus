@@ -8,6 +8,7 @@ import type {
 	UpdateCallback
 } from "$utils/interface";
 
+import events from "ruckus/events";
 import * as canvas from "./canvas";
 import { noop, override } from "$utils/utils";
 
@@ -44,6 +45,7 @@ const loop = (timestamp: number): void => {
 
 	if (state.time.delta > state.time.interval) {
 		state.time.last = timestamp - (state.time.delta % state.time.interval);
+		events.emit("tick", state.time);
 
 		while (state.time.accumulated >= state.time.interval) {
 			actions.update(state.time);
@@ -85,20 +87,24 @@ export const start = (callback: StartCallback): void => {
 	state.time.start = state.time.last;
 
 	callback({ on: canvas.on }, { renderWith, updateWith });
-	resume();
+	events.emit("start");
+	resume(false);
 };
 
 export const pause = (): void => {
-	state.state = "paused";
+	events.emit((state.state = "paused"));
 	cancelAnimationFrame(state.rid);
 };
 
-export const resume = (): void => {
+export const resume = (emit = true): void => {
 	state.state = "running";
+	if (emit) {
+		events.emit("resumed");
+	}
 	loop(state.time.last);
 };
 
 export const stop = (): void => {
-	state.state = "stopped";
+	events.emit((state.state = "stopped"));
 	loop(state.time.last);
 };
