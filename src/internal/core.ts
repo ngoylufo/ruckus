@@ -83,10 +83,13 @@ export const start = (callback: StartCallback): void => {
 		throw new Error("Ruckus.Start was already called");
 	}
 
+	const utils = { on: canvas.on, cursor: canvas.cursor };
+	const actions = { renderWith, updateWith };
+
 	state.time.last = performance.now();
 	state.time.start = state.time.last;
 
-	callback({ on: canvas.on }, { renderWith, updateWith });
+	callback(utils, actions);
 	events.emit("start");
 	resume(false);
 };

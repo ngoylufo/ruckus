@@ -1,8 +1,10 @@
 import type {
 	CanvasOptions,
 	Context,
+	Cursor,
 	Dimensions,
-	FixedDimensions
+	FixedDimensions,
+	RuckusCanvasState
 } from "$utils/interface";
 
 import { createCanvas } from "$utils/canvas";
@@ -11,6 +13,8 @@ import { memoize, override } from "$utils/utils";
 const defaultOptions: CanvasOptions = {
 	dimensions: "container"
 };
+
+const state: RuckusCanvasState = { rect: null };
 
 const context = memoize(
 	(target?: string | HTMLElement): Context => {
@@ -59,6 +63,29 @@ const parse_dimensions = (
 	return dimensions;
 };
 
+export const cursor = (): Readonly<Cursor> => {
+	const ctx = context();
+	const cursor: Cursor = { x: 0, y: 0 };
+
+	ctx.canvas.addEventListener("mouseleave", () => {
+		cursor.x = cursor.y = null;
+	});
+
+	ctx.canvas.addEventListener(
+		"mousemove",
+		(event: { x: number; y: number }) => {
+			if (state.rect === null) {
+				cursor.x = cursor.y = state.rect;
+			} else {
+				cursor.x = event.x - state.rect.left;
+				cursor.y = event.y - state.rect.top;
+			}
+		}
+	);
+
+	return cursor;
+};
+
 const updateOnResize = (ctx: Context, dimensions: Dimensions): void => {
 	const devicePixelRatio = window.devicePixelRatio;
 
@@ -70,6 +97,7 @@ const updateOnResize = (ctx: Context, dimensions: Dimensions): void => {
 		ctx.canvas.width = Math.floor(width * devicePixelRatio);
 		ctx.canvas.height = Math.floor(height * devicePixelRatio);
 
+		state.rect = ctx.canvas.getBoundingClientRect();
 		ctx.scale(devicePixelRatio, devicePixelRatio);
 	});
 

@@ -31,8 +31,18 @@ export interface AddCanvasListener {
 	(event: string, callback: EventListener): void;
 }
 
+export interface Cursor {
+	x: number | null;
+	y: number | null;
+}
+
 export interface CanvasUtils {
 	on: AddCanvasListener;
+	cursor(): Cursor;
+}
+
+export interface RuckusCanvasState {
+	rect: DOMRect | null;
 }
 
 export interface RuckusOptions {
