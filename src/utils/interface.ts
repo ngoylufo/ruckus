@@ -8,19 +8,18 @@ export interface FixedDimensions {
 export type Dimensions = "viewport" | "container" | FixedDimensions;
 
 export interface Noop {
-	(...args: never[]): void;
-	(): void;
+	(...args: unknown[]): void;
 }
 
-export interface ClearCallback extends Noop {
+export interface ClearCallback {
 	(ctx: Context): void;
 }
 
-export interface UpdateCallback extends Noop {
+export interface UpdateCallback {
 	(time: Readonly<Time>): void;
 }
 
-export interface RenderCallback extends Noop {
+export interface RenderCallback {
 	(ctx: Context): void;
 }
 
@@ -44,9 +43,9 @@ export interface RuckusOptions {
 }
 
 export interface RuckusActions {
-	clear: ClearCallback;
-	update: UpdateCallback;
-	render: RenderCallback;
+	clear: ClearCallback | Noop;
+	update: UpdateCallback | Noop;
+	render: RenderCallback | Noop;
 }
 
 export interface SetRuckusActions {
